@@ -11,7 +11,7 @@ model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
-  role      String   @default("user") // "user" | "admin"
+  role      String   @default("user") 
   orders    Order[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -23,11 +23,16 @@ model Order {
   user          User        @relation(fields: [userId], references: [id])
   items         OrderItem[]
   totalAmount   Float
-  paymentMethod String // "stripe" | "paypal"
-  paymentStatus String      @default("pending") // "pending" | "paid" | "failed"
-  orderStatus   String      @default("pending") // "pending" | "processing" | "shipped" | "delivered"
+  paymentMethod String 
+  paymentStatus String      @default("pending") 
+  orderStatus   String      @default("pending")
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([orderStatus])
+  @@index([paymentStatus])
+  @@index([createdAt])
 }
 
 model OrderItem {
@@ -37,4 +42,6 @@ model OrderItem {
   title    String
   price    Float
   quantity Int
+
+  @@index([orderId])
 }
