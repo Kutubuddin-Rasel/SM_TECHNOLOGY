@@ -8,6 +8,9 @@ import { generalLimiter } from './middlewares/rateLimit.middleware';
 
 const app = express();
 
+// Trust first proxy (required for Render, Heroku, etc.)
+app.set('trust proxy', 1);
+
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true
