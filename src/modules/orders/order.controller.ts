@@ -20,8 +20,9 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         const data = createOrderSchema.parse(req.body);
         const result = await orderService.createOrder({ userId, ...data });
         res.status(201).json(result);
-    } catch (error: any) {
-        res.status(400).json({ error: error.message });
+    } catch (error) {
+        const err = error as Error;
+        res.status(400).json({ error: err.message });
     }
 };
 
@@ -44,7 +45,8 @@ export const updateStatus = async (req: AuthRequest, res: Response) => {
         });
 
         res.json(order);
-    } catch (error: any) {
-        res.status(400).json({ error: error.message });
+    } catch (error) {
+        const err = error as Error;
+        res.status(400).json({ error: err.message });
     }
 };

@@ -2,11 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import config from '../config';
 
+type AuthUser={
+    id:string;
+    role:string;
+}
+
 export interface AuthRequest extends Request {
-    user?: {
-        id: string;
-        role: string;
-    };
+    user?:AuthUser
 }
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -17,7 +19,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     }
 
     try {
-        const decoded = jwt.verify(token, config.auth.jwtSecret) as { id: string; role: string };
+        const decoded = jwt.verify(token, config.auth.jwtSecret) as AuthUser ;
         req.user = decoded;
         next();
     } catch (error) {

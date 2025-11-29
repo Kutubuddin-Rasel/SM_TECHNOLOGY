@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import routes from './routes';
 import paymentRoutes from './modules/payment/payment.routes';
-import { errorHandler } from './middlewares/error.middleware';
 import { generalLimiter } from './middlewares/rateLimit.middleware';
 
 const app = express();
@@ -21,8 +20,5 @@ app.use('/payments', paymentRoutes);
 app.use(express.json());
 
 app.use('/api', routes);
-
-app.use(errorHandler);
-
 
 export default app;

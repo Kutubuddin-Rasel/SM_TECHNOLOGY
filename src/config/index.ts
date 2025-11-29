@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { SignOptions } from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -37,7 +38,9 @@ export const config = {
 
     auth: {
         jwtSecret: getJwtSecret(),
-        jwtExpiresIn: '1d',
+        jwtExpiresIn: '15m' as SignOptions['expiresIn'],
+        refreshSecret: process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-fallback',
+        refreshExpiresIn: '7d',
         bcryptSaltRounds: 10,
     },
 
@@ -49,6 +52,8 @@ export const config = {
     paypal: {
         clientId: process.env.PAYPAL_CLIENT_ID || '',
         clientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
+        webhookId: process.env.PAYPAL_WEBHOOK_ID || '',
+        mode: process.env.PAYPAL_MODE || 'sandbox', // 'sandbox' or 'live'
     },
 
     openrouter: {

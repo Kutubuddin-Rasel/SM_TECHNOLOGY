@@ -10,7 +10,6 @@ interface CreateOrderDto {
 export const createOrder = async (data: CreateOrderDto) => {
     const totalAmount = data.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    // 1. Create Order in DB
     const order = await prisma.order.create({
         data: {
             userId: data.userId,
@@ -27,7 +26,6 @@ export const createOrder = async (data: CreateOrderDto) => {
         include: { items: true },
     });
 
-    // 2. Initialize Payment
     const paymentResponse = await paymentService.initiatePayment(totalAmount, data.paymentMethod, order.id);
 
     return { order, payment: paymentResponse };

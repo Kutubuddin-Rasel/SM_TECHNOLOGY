@@ -1,5 +1,6 @@
 import { createClient } from 'redis';
 import config from './index';
+import { logger } from '../utils/logger';
 
 const redisClient = createClient({
     url: config.redis.url
@@ -9,8 +10,9 @@ redisClient.on('error', (err) => {
     console.error('Redis Client Error:', err);
 });
 
+
 redisClient.on('connect', () => {
-    console.log('Redis connected successfully');
+    logger.info('Redis connected successfully');
 });
 
 let isConnected = false;
