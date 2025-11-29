@@ -2,28 +2,28 @@
 
 A production-ready backend system featuring real-time order management, secure payment processing (Stripe/PayPal), and AI-powered chatbot integration with enterprise-grade security.
 
-## 🚀 Features
+## Features
 
 ### Core Features
-- ✅ **JWT Authentication** - HTTP-only cookie-based auth with CSRF protection
-- ✅ **Order Management** - Create and track orders with real-time updates
-- ✅ **Payment Integration** - Stripe (production-ready) + PayPal (mocked)
-- ✅ **Real-Time Updates** - Socket.io for instant order status notifications
-- ✅ **AI Chatbot** - OpenRouter (Grok 4.1 Fast) with conversation context
-- ✅ **Admin Dashboard** - RBAC with granular permissions
-- ✅ **Webhook Handling** - Secure payment confirmation via webhooks
+- **JWT Authentication** - HTTP-only cookie-based auth with CSRF protection
+- **Order Management** - Create and track orders with real-time updates
+- **Payment Integration** - Stripe (production-ready) + PayPal (mocked)
+- **Real-Time Updates** - Socket.io for instant order status notifications
+- **AI Chatbot** - OpenRouter (Grok 4.1 Fast) with conversation context
+- **Admin Dashboard** - RBAC with granular permissions
+- **Webhook Handling** - Secure payment confirmation via webhooks
 
 ### Bonus Features
-- 🔒 **HTTP-Only Cookies** - XSS protection
-- 🛡️ **CSRF Protection** - Double-submit cookie pattern
-- ⚡ **Redis Caching** - Chat history with graceful fallback
-- 🚦 **Rate Limiting** - Tiered limits (auth, orders, chatbot)
-- 👥 **Enhanced RBAC** - Permission-based access control
-- 📊 **Security** - Helmet, CORS, input validation
+- **HTTP-Only Cookies** - XSS protection
+- **CSRF Protection** - Double-submit cookie pattern
+- **Redis Caching** - Chat history with graceful fallback
+- **Rate Limiting** - Tiered limits (auth, orders, chatbot)
+- **Enhanced RBAC** - Permission-based access control
+- **Security** - Helmet, CORS, input validation
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Prerequisites](#prerequisites)
 2. [Installation](#installation)
@@ -38,7 +38,7 @@ A production-ready backend system featuring real-time order management, secure p
 
 ---
 
-## 📦 Prerequisites
+## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
@@ -52,7 +52,7 @@ Before you begin, ensure you have the following installed:
 
 ---
 
-## 🛠️ Installation
+## Installation
 
 ### 1. Clone the Repository
 
@@ -83,7 +83,7 @@ docker ps
 
 ---
 
-## ⚙️ Environment Setup
+## Environment Setup
 
 ### 1. Create Environment File
 
@@ -135,7 +135,7 @@ OPENROUTER_API_KEY="your_openrouter_api_key"
 
 ---
 
-## 🗄️ Database Setup
+## Database Setup
 
 ### 1. Run Migrations
 
@@ -172,7 +172,7 @@ docker exec -it sm_postgres psql -U user -d sm_db
 
 ---
 
-## ▶️ Running the Application
+## Running the Application
 
 ### Development Mode
 
@@ -204,7 +204,7 @@ curl http://localhost:3000/api/csrf/csrf-token
 
 ---
 
-## 🧪 API Testing
+## API Testing
 
 ### 1. Import Postman Collection
 
@@ -227,7 +227,7 @@ Content-Type: application/json
 }
 ```
 
-**Response:** Cookie set automatically ✅
+**Response:** Cookie set automatically 
 
 ---
 
@@ -307,7 +307,7 @@ X-CSRF-Token: abc123xyz...
 
 ---
 
-## 🔌 Stripe Webhook Testing
+## Stripe Webhook Testing
 
 ### Setup
 
@@ -384,7 +384,7 @@ You should see:
 2025-11-29 16:10:00  <-- [200] POST /payments/stripe/webhook
 ```
 
-`[200]` = Success! ✅
+`[200]` = Success!
 
 #### **2. Check Server Logs (Terminal 2)**
 
@@ -471,7 +471,7 @@ SM/
 
 ---
 
-## 📚 API Documentation
+## API Documentation
 
 ### Base URL
 ```
@@ -482,18 +482,18 @@ http://localhost:3000/api
 
 | Method | Endpoint | Description | CSRF Required |
 |--------|----------|-------------|---------------|
-| POST | `/auth/register` | Register new user | ❌ No |
-| POST | `/auth/login` | Login user | ❌ No |
-| POST | `/auth/logout` | Logout user | ❌ No |
+| POST | `/auth/register` | Register new user | No |
+| POST | `/auth/login` | Login user | No |
+| POST | `/auth/logout` | Logout user | No |
 
 ### Protected Endpoints (Require Authentication)
 
 | Method | Endpoint | Description | CSRF Required |
 |--------|----------|-------------|---------------|
-| GET | `/csrf/csrf-token` | Get CSRF token | ❌ No |
-| POST | `/orders` | Create order | ✅ Yes |
-| PATCH | `/orders/:id/status` | Update order (admin) | ✅ Yes |
-| POST | `/chatbot` | Chat with AI | ✅ Yes |
+| GET | `/csrf/csrf-token` | Get CSRF token | No |
+| POST | `/orders` | Create order | Yes |
+| PATCH | `/orders/:id/status` | Update order (admin) | Yes |
+| POST | `/chatbot` | Chat with AI | Yes |
 
 ### Webhook Endpoints (External Only)
 
@@ -504,7 +504,7 @@ http://localhost:3000/api
 
 ---
 
-## 🔒 Security Features
+## Security Features
 
 ### 1. HTTP-Only Cookies
 - JWT stored in secure, HTTP-only cookies
@@ -535,7 +535,7 @@ http://localhost:3000/api
 
 ---
 
-## 🎯 Quick Start (TL;DR)
+## Quick Start (TL;DR)
 
 ```bash
 # 1. Install & Setup
@@ -562,16 +562,7 @@ npm run dev
 
 ---
 
-## 📖 Additional Documentation
-
-- **[TECHNICAL_DOCS.md](TECHNICAL_DOCS.md)** - Deep dive into architecture, middleware, and flows
-- **[TEST_CASES.md](TEST_CASES.md)** - Comprehensive test scenarios and expected results
-- **[COOKIE_AUTH_GUIDE.md](COOKIE_AUTH_GUIDE.md)** - HTTP-only cookie implementation guide
-- **[FOLDER_STRUCTURE.md](FOLDER_STRUCTURE.md)** - Architecture explanation and comparison
-
----
-
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Database Connection Failed
 ```bash
@@ -607,21 +598,6 @@ GET /api/csrf/csrf-token
 docker exec -it sm_redis redis-cli ping
 # Should return: PONG
 ```
-
----
-
-## 🚀 Deployment Checklist
-
-- [ ] Set `NODE_ENV=production`
-- [ ] Use strong `JWT_SECRET`
-- [ ] Configure production database URL
-- [ ] Add production Stripe keys
-- [ ] Set correct `FRONTEND_URL` for CORS
-- [ ] Enable HTTPS (cookies require `secure: true`)
-- [ ] Set up production Redis instance
-- [ ] Configure Stripe production webhooks
-- [ ] Run database migrations
-- [ ] Set up environment variables on hosting platform
 
 ---
 
