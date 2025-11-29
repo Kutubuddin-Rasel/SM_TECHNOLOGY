@@ -17,10 +17,8 @@ export const initSocket = (httpServer: HttpServer) => {
     // Authentication middleware
     io.use((socket: Socket, next) => {
         try {
-            // Method 1: Query parameter (Recommended for frontend)
             let token = socket.handshake.auth.token || socket.handshake.query.token as string;
 
-            // Method 2: Fallback to cookie (Backward compatibility)
             if (!token) {
                 const cookies = socket.handshake.headers.cookie;
                 if (cookies) {
@@ -35,12 +33,10 @@ export const initSocket = (httpServer: HttpServer) => {
                 return next(new Error('Authentication required'));
             }
 
-            // Verify token
             const decoded = jwt.verify(token, config.auth.jwtSecret) as { id: string; role: string };
             socket.data.userId = decoded.id;
             socket.data.role = decoded.role;
 
-            // Join user's personal room for targeted emissions
             socket.join(decoded.id);
 
             logger.info(`Socket connected: User ${decoded.id}`);
@@ -56,7 +52,6 @@ export const initSocket = (httpServer: HttpServer) => {
         const userId = socket.data.userId;
         logger.info(`User connected via Socket.io: ${userId}`);
 
-        // Handle custom events if needed
         socket.on('ping', () => {
             socket.emit('pong', { timestamp: Date.now() });
         });
@@ -76,12 +71,6 @@ export const getIO = () => {
     return io;
 };
 
-/**
- * Emit event to a specific user
- * @param userId - User ID to send the event to
- * @param event - Event name
- * @param data - Event data
- */
 export const emitToUser = (userId: string, event: string, data: unknown) => {
     if (io) {
         io.to(userId).emit(event, data);
