@@ -9,7 +9,7 @@ const server = http.createServer(app);
 initSocket(server);
 
 connectRedis().catch((err) => {
-    console.warn('⚠️  Redis connection failed, using in-memory fallback:', err.message);
+    console.warn('Redis connection failed, using in-memory fallback:', err.message);
 });
 
 server.listen(config.port, () => {
