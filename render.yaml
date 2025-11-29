@@ -3,7 +3,7 @@ services:
   - type: web
     name: sm-technology-api
     runtime: node
-    plan: free  
+    plan: free
     buildCommand: npm install && npm run build && npx prisma generate && npx prisma migrate deploy
     startCommand: npm start
     envVars:
@@ -16,10 +16,7 @@ services:
           name: sm-postgres
           property: connectionString
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: sm-redis
-          property: connectionString
+        sync: false  # You'll add this manually after creating Redis
       - key: JWT_SECRET
         generateValue: true
       - key: REFRESH_TOKEN_SECRET
@@ -46,12 +43,8 @@ services:
 databases:
   - name: sm-postgres
     databaseName: sm_db
-    plan: starter  # Free tier (1GB)
+    plan: starter
     ipAllowList: []
 
-# Redis Instance  
-  - type: redis
-    name: sm-redis
-    plan: starter  # Free tier (25MB)
-    maxmemoryPolicy: noeviction
-    ipAllowList: []
+# NOTE: Redis must be created manually in Render Dashboard
+# After creating Redis, copy its Internal URL and add as REDIS_URL env var
