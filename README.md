@@ -1,265 +1,237 @@
-# SM Backend - Real-Time Order Management System
+# SM Technology - E-Commerce Backend API
 
-A production-ready backend system featuring real-time order management, secure payment processing (Stripe/PayPal), and AI-powered chatbot integration with enterprise-grade security.
+**Production URL:** https://sm-technology-api.onrender.com
 
-## Features
-
-### Core Features
-- **JWT Authentication** - HTTP-only cookie-based auth with CSRF protection
-- **Order Management** - Create and track orders with real-time updates
-- **Payment Integration** - Stripe (production-ready) + PayPal (mocked)
-- **Real-Time Updates** - Socket.io for instant order status notifications
-- **AI Chatbot** - OpenRouter (Grok 4.1 Fast) with conversation context
-- **Admin Dashboard** - RBAC with granular permissions
-- **Webhook Handling** - Secure payment confirmation via webhooks
-
-### Bonus Features
-- **HTTP-Only Cookies** - XSS protection
-- **CSRF Protection** - Double-submit cookie pattern
-- **Redis Caching** - Chat history with graceful fallback
-- **Rate Limiting** - Tiered limits (auth, orders, chatbot)
-- **Enhanced RBAC** - Permission-based access control
-- **Security** - Helmet, CORS, input validation
+A production-ready Node.js/TypeScript backend API featuring dual payment processing (Stripe & PayPal), real-time notifications via Socket.io, AI-powered chatbot, JWT authentication with refresh tokens, and comprehensive order management.
 
 ---
 
-## Table of Contents
+## 🚀 **Features**
+
+- ✅ **Dual Payment Processing** - Stripe & PayPal integration with webhook verification
+- ✅ **Real-time Notifications** - Socket.io for instant order updates
+- ✅ **AI Chatbot** - OpenRouter integration with conversation history
+- ✅ **JWT Authentication** - Access + Refresh token strategy (15min/7day)
+- ✅ **CSRF Protection** - Secure against cross-site attacks
+- ✅ **Rate Limiting** - Redis-backed with automatic fallback
+- ✅ **Role-Based Access Control** - User, Admin, Super Admin roles
+- ✅ **Database Migrations** - Prisma ORM with PostgreSQL
+- ✅ **Production Deployment** - Deployed on Render with auto-deploy
+
+---
+
+## 📋 **Table of Contents**
 
 1. [Prerequisites](#prerequisites)
 2. [Installation](#installation)
-3. [Environment Setup](#environment-setup)
+3. [Environment Variables](#environment-variables)
 4. [Database Setup](#database-setup)
 5. [Running the Application](#running-the-application)
-6. [API Testing](#api-testing)
-7. [Stripe Webhook Testing](#stripe-webhook-testing)
-8. [Project Structure](#project-structure)
-9. [API Documentation](#api-documentation)
-10. [Security Features](#security-features)
+6. [API Endpoints](#api-endpoints)
+7. [Webhook Setup](#webhook-setup)
+8. [Testing](#testing)
+9. [Deployment](#deployment)
+10. [Architecture](#architecture)
 
 ---
 
-## Prerequisites
+## 📦 **Prerequisites**
 
-Before you begin, ensure you have the following installed:
-
-- **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
-- **Docker & Docker Compose** - [Download](https://www.docker.com/)
-- **Stripe CLI** (for webhook testing) - Install via:
-  ```bash
-  brew install stripe/stripe-cli/stripe
-  ```
-- **Postman** (for API testing) - [Download](https://www.postman.com/)
+- **Node.js** >= 18.0.0
+- **PostgreSQL** >= 14
+- **Redis** (optional - falls back to in-memory)
+- **npm** or **yarn**
+- **Stripe Account** (for payment testing)
+- **OpenRouter API Key** (for AI chatbot)
 
 ---
 
-## Installation
+## 🛠 **Installation**
 
-### 1. Clone the Repository
-
+### **1. Clone Repository**
 ```bash
-git clone <your-repo-url>
-cd SM
+git clone https://github.com/Kutubuddin-Rasel/SM_TECHNOLOGY.git
+cd SM_TECHNOLOGY
 ```
 
-### 2. Install Dependencies
-
+### **2. Install Dependencies**
 ```bash
 npm install
 ```
 
-### 3. Start Docker Services
-
+### **3. Generate Prisma Client**
 ```bash
-# Start PostgreSQL and Redis
-docker-compose up -d
-
-# Verify containers are running
-docker ps
-
-# Should show:
-# - sm_postgres (port 5434)
-# - sm_redis (port 6379)
+npx prisma generate
 ```
 
 ---
 
-## Environment Setup
+## 🔐 **Environment Variables**
 
-### 1. Create Environment File
+Create a `.env` file in the root directory:
 
-```bash
-cp .env.example .env
-```
+```env
+# Server
+NODE_ENV=development
+PORT=3000
 
-### 2. Configure Environment Variables
-
-Edit `.env` with your configuration:
-
-```bash
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5434/sm_db?schema=public"
+DATABASE_URL="postgresql://user:password@localhost:5432/sm_db"
 
-# Redis
+# Redis (optional - uses in-memory fallback)
 REDIS_URL="redis://localhost:6379"
 
-# JWT Secret (REQUIRED - generate a strong secret)
-JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
+# JWT Authentication
+JWT_SECRET="your-super-secret-jwt-key-change-in-production"
+REFRESH_TOKEN_SECRET="your-super-secret-refresh-token-key-change-in-production"
 
-# Server
-PORT=3000
-FRONTEND_URL="http://localhost:3000"
-
-# Stripe (production keys)
+# Stripe Payment
 STRIPE_SECRET_KEY="sk_test_your_stripe_secret_key"
-STRIPE_WEBHOOK_SECRET="whsec_your_webhook_secret"  # From Stripe CLI
+STRIPE_WEBHOOK_SECRET="whsec_your_webhook_secret"
 
-# PayPal (mocked - use placeholders)
-PAYPAL_CLIENT_ID="placeholder"
-PAYPAL_CLIENT_SECRET="placeholder"
+# PayPal Payment (optional)
+PAYPAL_CLIENT_ID="your_paypal_client_id"
+PAYPAL_CLIENT_SECRET="your_paypal_client_secret"
+PAYPAL_WEBHOOK_ID="your_paypal_webhook_id"
+PAYPAL_MODE="sandbox"  # or "live" for production
 
-# OpenRouter (AI Chatbot)
-OPENROUTER_API_KEY="your_openrouter_api_key"
+# OpenRouter AI (optional)
+OPENROUTER_API_KEY="sk-or-v1-your-openrouter-key"
+
+# Frontend (for CORS)
+FRONTEND_URL="http://localhost:3000"
 ```
 
-### 3. Get Required API Keys
+### **🔑 How to Get API Keys**
 
-#### **Stripe API Key**
-1. Go to [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys)
-2. Copy your **Secret key** (starts with `sk_test_`)
-3. Add to `.env` as `STRIPE_SECRET_KEY`
+#### **Stripe:**
+1. Go to https://dashboard.stripe.com/test/apikeys
+2. Copy **Secret key** (`sk_test_...`)
+3. For webhook secret, see [Webhook Setup](#webhook-setup)
 
-#### **OpenRouter API Key** (for AI Chatbot)
-1. Sign up at [OpenRouter](https://openrouter.ai/)
-2. Generate an API key
-3. Add to `.env` as `OPENROUTER_API_KEY`
+#### **OpenRouter (AI Chatbot):**
+1. Go to https://openrouter.ai/
+2. Sign up and navigate to **Keys**
+3. Create new API key
+4. **Free tier available** with Grok model
+
+#### **PayPal (Optional):**
+1. Go to https://developer.paypal.com/
+2. Create sandbox app
+3. Copy Client ID and Secret
+4. For webhook ID, see [Webhook Setup](#webhook-setup)
 
 ---
 
-## Database Setup
+## 🗄 **Database Setup**
 
-### 1. Run Migrations
-
+### **1. Create PostgreSQL Database**
 ```bash
-npx prisma migrate dev
-
-# This will:
-# - Create database tables
-# - Generate Prisma client
+createdb sm_db
 ```
 
-### 2. (Optional) Seed Database
+### **2. Run Migrations**
+```bash
+npx prisma migrate deploy
+```
 
+### **3. Seed Database (Optional)**
+Creates test users: user, admin, and super_admin
 ```bash
 npx prisma db seed
 ```
 
-### 3. Verify Database
+**Test Accounts Created:**
+- `user@example.com` (password: `user123`) - Role: user
+- `admin@example.com` (password: `admin123`) - Role: admin
+- `superadmin@example.com` (password: `superadmin123`) - Role: super_admin
 
+### **4. View Database (Optional)**
 ```bash
-# Connect to database
-docker exec -it sm_postgres psql -U user -d sm_db
-
-# Check tables
-\dt
-
-# View schema
-\d "User"
-\d "Order"
-
-# Exit
-\q
+npx prisma studio
+# Opens at http://localhost:5555
 ```
 
 ---
 
-## Running the Application
+## ▶️ **Running the Application**
 
-### Development Mode
-
+### **Development Mode:**
 ```bash
 npm run dev
-
-# Server will start on http://localhost:3000
+# Server runs at http://localhost:3000
 ```
 
-### Production Build
-
+### **Production Build:**
 ```bash
-# Build TypeScript
 npm run build
-
-# Start production server
 npm start
 ```
 
-### Verify Server is Running
-
+### **Watch Logs:**
 ```bash
-# Test endpoint
-curl http://localhost:3000/api/csrf/csrf-token
-
-# Should return:
-# {"csrfToken":"..."}
+# Development logs appear in terminal
+# Production: Check Render dashboard
 ```
 
 ---
 
-## API Testing
+## 📡 **API Endpoints**
 
-### 1. Import Postman Collection
+**Base URL (Local):** `http://localhost:3000`  
+**Base URL (Production):** `https://sm-technology-api.onrender.com`
 
-1. Open Postman
-2. Click **Import**
-3. Select `postman_collection.json` from project root
-4. Collection imported with all endpoints!
+### **🔐 Public Endpoints**
 
-### 2. Testing Workflow
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/csrf/csrf-token` | Get CSRF token for protected requests |
 
-#### **Step 1: Register User**
+### **🔑 Authentication**
 
-```http
-POST http://localhost:3000/api/auth/register
-Content-Type: application/json
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `POST` | `/api/auth/register` | Register new user | ❌ |
+| `POST` | `/api/auth/login` | Login user | ❌ |
+| `POST` | `/api/auth/refresh` | Refresh access token | ✅ (Refresh Token) |
+| `POST` | `/api/auth/logout` | Logout current session | ✅ |
 
+**Request Example (Register/Login):**
+```json
 {
-  "email": "test@example.com",
-  "password": "SecurePass123!"
+  "email": "user@example.com",
+  "password": "password123"
 }
-```
-
-**Response:** Cookie set automatically 
-
----
-
-#### **Step 2: Get CSRF Token**
-
-```http
-GET http://localhost:3000/api/csrf/csrf-token
 ```
 
 **Response:**
 ```json
 {
-  "csrfToken": "abc123xyz..."
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "role": "user"
+  }
 }
 ```
-
-**Important:** Copy this token! You'll need it for all protected endpoints.
+Cookies set: `token` (access - 15min), `refreshToken` (refresh - 7days)
 
 ---
 
-#### **Step 3: Create Order**
+### **📦 Orders**
 
-```http
-POST http://localhost:3000/api/orders
-Content-Type: application/json
-X-CSRF-Token: abc123xyz...
+| Method | Endpoint | Description | Auth Required | CSRF Required |
+|--------|----------|-------------|---------------|---------------|
+| `POST` | `/api/orders` | Create order | ✅ | ✅ |
+| `PATCH` | `/api/orders/:id/status` | Update order status | ✅ (Admin) | ✅ |
 
+**Create Order Request:**
+```json
 {
   "items": [
     {
-      "title": "MacBook Pro 16\"",
-      "price": 2499.99,
+      "title": "Wireless Keyboard",
+      "price": 59.99,
       "quantity": 1
     }
   ],
@@ -267,11 +239,12 @@ X-CSRF-Token: abc123xyz...
 }
 ```
 
-**Response:**
+**Create Order Response:**
 ```json
 {
   "order": {
-    "id": "order_123...",
+    "id": "order-uuid",
+    "totalAmount": 59.99,
     "paymentStatus": "pending",
     "orderStatus": "pending"
   },
@@ -282,338 +255,432 @@ X-CSRF-Token: abc123xyz...
 }
 ```
 
-**Save the `order.id` for webhook testing!**
+**Update Status Request:**
+```json
+{
+  "orderStatus": "shipped"
+}
+```
+
+**Valid Statuses:** `pending`, `processing`, `shipped`, `delivered`, `cancelled`
 
 ---
 
-#### **Step 4: Chat with AI**
+### **💬 AI Chatbot**
 
-```http
-POST http://localhost:3000/api/chatbot
-Content-Type: application/json
-X-CSRF-Token: abc123xyz...
+| Method | Endpoint | Description | Auth Required | CSRF Required |
+|--------|----------|-------------|---------------|---------------|
+| `POST` | `/api/chatbot` | Send AI message | ✅ | ✅ |
 
+**Request:**
+```json
 {
-  "message": "What laptops do you recommend?"
+  "message": "What are your business hours?"
 }
 ```
 
 **Response:**
 ```json
 {
-  "reply": "Based on your needs, I recommend..."
+  "reply": "Our business hours are Monday-Friday 9AM-5PM EST.",
+  "context": [
+    {"role": "user", "content": "What are your business hours?"},
+    {"role": "assistant", "content": "Our business hours are..."}
+  ]
+}
+```
+
+**Features:**
+- Remembers last 6 messages per user
+- Stored in Redis (1 hour TTL)
+- Falls back to in-memory if Redis unavailable
+
+---
+
+### **💳 Payment Webhooks**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/payments/stripe/webhook` | Stripe webhook handler |
+| `POST` | `/payments/paypal/webhook` | PayPal webhook handler |
+
+**⚠️ These endpoints are called by Stripe/PayPal, not by frontend!**
+
+---
+
+## 🔗 **Webhook Setup**
+
+### **Stripe Webhooks**
+
+#### **Local Development:**
+```bash
+# Terminal 1: Run your server
+npm run dev
+
+# Terminal 2: Forward webhooks
+stripe listen --forward-to localhost:3000/payments/stripe/webhook
+
+# Terminal 3: Trigger test webhook
+stripe trigger payment_intent.succeeded
+```
+
+#### **Production:**
+
+1. **Go to Stripe Dashboard:**
+   - Visit https://dashboard.stripe.com/webhooks
+   - Click **"Add endpoint"**
+
+2. **Configure Endpoint:**
+   - **URL:** `https://sm-technology-api.onrender.com/payments/stripe/webhook`
+   - **Events:** Select `payment_intent.succeeded`
+   - Click **"Add endpoint"**
+
+3. **Get Webhook Secret:**
+   - Click on your endpoint
+   - Click **"Reveal"** next to Signing secret
+   - Copy the secret (starts with `whsec_...`)
+
+4. **Add to Environment:**
+   - Render Dashboard → Your Service → Environment
+   - Add: `STRIPE_WEBHOOK_SECRET` = `whsec_your_secret`
+   - Save (auto-redeploys)
+
+**Webhook Payload (Stripe sends this):**
+```json
+{
+  "type": "payment_intent.succeeded",
+  "data": {
+    "object": {
+      "id": "pi_xxx",
+      "metadata": {
+        "orderId": "your-order-id"
+      }
+    }
+  }
 }
 ```
 
 ---
 
-## Stripe Webhook Testing
+### **PayPal Webhooks (Optional)**
 
-### Setup
+**Note:** PayPal integration is complete but requires PayPal account for testing.
 
-#### **Step 1: Login to Stripe CLI**
+#### **Production Setup:**
 
-```bash
-stripe login
+1. **Go to PayPal Developer Dashboard:**
+   - Visit https://developer.paypal.com/dashboard/webhooks
 
-# Follow the browser prompt to authenticate
-```
+2. **Create Webhook:**
+   - **URL:** `https://sm-technology-api.onrender.com/payments/paypal/webhook`
+   - **Events:** Select `PAYMENT.CAPTURE.COMPLETED`
+   - Save
 
-#### **Step 2: Start Stripe Listener (Terminal 1)**
+3. **Get Webhook ID:**
+   - Copy Webhook ID from dashboard
 
-```bash
-stripe listen --forward-to localhost:3000/payments/stripe/webhook
+4. **Add to Environment:**
+   - Add: `PAYPAL_WEBHOOK_ID` = `your-webhook-id`
 
-# You'll see:
-# > Your webhook signing secret is whsec_xxx...
-```
-
-**IMPORTANT:** Copy the webhook secret!
-
-#### **Step 3: Update .env**
-
-Add the webhook secret to your `.env`:
-
-```bash
-STRIPE_WEBHOOK_SECRET=whsec_xxx_from_stripe_cli
-```
-
-#### **Step 4: Restart Server (Terminal 2)**
-
-```bash
-# Stop server (Ctrl+C)
-npm run dev
-
-# Server must reload the new webhook secret
+**Webhook Payload (PayPal sends this):**
+```json
+{
+  "event_type": "PAYMENT.CAPTURE.COMPLETED",
+  "resource": {
+    "custom_id": "your-order-id",
+    "amount": {
+      "value": "59.99"
+    }
+  }
+}
 ```
 
 ---
 
-### Testing Webhooks
+## 🧪 **Testing**
 
-#### **Option 1: Trigger Test Event**
+### **Postman Collection**
 
+Import `postman_collection.json` for complete API testing.
+
+**Collection includes:**
+- All 11 endpoints with examples
+- Auto-save CSRF token script
+- Admin login examples
+- Chat history testing
+- Order creation flows
+
+**Update base URL:**
+- Local: `http://localhost:3000`
+- Production: `https://sm-technology-api.onrender.com`
+
+### **Test Payment Flow (Stripe)**
+
+**1. Create Order:**
 ```bash
-# Create an order first (save the order ID)
-# Then trigger webhook with YOUR order ID:
-
-stripe trigger payment_intent.succeeded \
-  --override 'payment_intent:metadata[orderId]=YOUR_ORDER_ID_HERE'
+# Use Postman: POST /api/orders
+# Returns clientSecret
 ```
 
-**⚠️ Note the QUOTES around the override parameter!** (Required for zsh shell)
-
-#### **Option 2: Use Real Payment Intent**
-
-If you created a payment from the API:
-
+**2. Complete Payment:**
 ```bash
-stripe trigger payment_intent.succeeded \
-  --override 'payment_intent:id=pi_xxx_from_your_order'
+# Local (CLI):
+stripe trigger payment_intent.succeeded
+
+# Production (Dashboard):
+# - Stripe Dashboard → Payments
+# - Find your payment
+# - Use test card: 4242 4242 4242 4242
 ```
+
+**3. Verify Update:**
+- Check logs for "Order updated to paid"
+- Database: `paymentStatus` = "paid"
+- Socket.io event sent to user
+
+### **Stripe Test Cards**
+
+| Card Number | Type | Result |
+|-------------|------|--------|
+| 4242 4242 4242 4242 | Visa | Success |
+| 4000 0000 0000 9995 | Visa | Declined |
+| 4000 0000 0000 3220 | Visa | Requires 3D Secure |
+
+**Any future date, any CVC works**
 
 ---
 
-### Verify Webhook Success
+## 🚀 **Deployment**
 
-#### **1. Check Stripe Listener (Terminal 1)**
+### **Deployed on Render**
 
-You should see:
-```
-2025-11-29 16:10:00  --> payment_intent.succeeded [evt_xxx]
-2025-11-29 16:10:00  <-- [200] POST /payments/stripe/webhook
-```
+**Live URL:** https://sm-technology-api.onrender.com
 
-`[200]` = Success!
+**Deployment Status:** ✅ Production Ready
 
-#### **2. Check Server Logs (Terminal 2)**
+### **Deploy Your Own**
 
-```
-Webhook signature verified
-Order 442fe96d-35b0-4c40-949d-345079d7bf7d updated: paid
-Socket.io event emitted to user
-```
-
-#### **3. Verify Database**
-
+**1. Push to GitHub:**
 ```bash
-docker exec -it sm_postgres psql -U user -d sm_db \
-  -c "SELECT id, \"paymentStatus\", \"orderStatus\" FROM \"Order\" WHERE id = 'YOUR_ORDER_ID';"
+git add .
+git commit -m "Initial commit"
+git push origin main
 ```
 
-**Should show:**
-```
-paymentStatus: "paid"
-orderStatus: "processing"
-```
+**2. Create Render Account:**
+- Go to https://render.com
+- Sign up with GitHub
+
+**3. Deploy with Blueprint:**
+- Click **"New" → "Blueprint"**
+- Connect repository
+- Render detects `render.yaml`
+- Click **"Apply"**
+
+**What gets created:**
+- ✅ Web Service (Node.js)
+- ✅ PostgreSQL Database
+- ✅ Auto-generated JWT secrets
+- ✅ Automatic deploys on push
+
+**4. Add Environment Variables:**
+- Dashboard → Environment
+- Add Stripe keys, OpenRouter key, etc.
+- Save (auto-redeploys)
+
+**5. Configure Webhooks:**
+- Follow [Webhook Setup](#webhook-setup) section
+- Use production URL
+
+### **Free Tier Limits**
+
+- **Web Service:** 750 hours/month
+- **PostgreSQL:** 1GB storage, 90-day retention
+- **Spin Down:** After 15min inactivity
+- **Cold Start:** ~30 seconds on first request
+
+**Upgrade to $7/month for:**
+- 24/7 uptime (no cold starts)
+- Unlimited retention
+- More resources
 
 ---
 
-## 📁 Project Structure
+## 🏗 **Architecture**
+
+### **Tech Stack**
+
+- **Runtime:** Node.js 18+
+- **Language:** TypeScript
+- **Framework:** Express.js
+- **Database:** PostgreSQL (Prisma ORM)
+- **Cache:** Redis (optional)
+- **Real-time:** Socket.io
+- **Auth:** JWT (jsonwebtoken)
+- **Validation:** Zod
+- **Payments:** Stripe, PayPal
+- **AI:** OpenRouter (Grok model)
+
+### **Project Structure**
 
 ```
 SM/
 ├── prisma/
-│   ├── schema.prisma           # Database schema
-│   └── migrations/             # Database migrations
-│
+│   ├── schema.prisma          # Database schema
+│   ├── migrations/            # Database migrations
+│   └── seed.ts                # Test data seeder
 ├── src/
-│   ├── modules/                # Feature modules
-│   │   ├── auth/               # Authentication (register, login, logout)
-│   │   ├── orders/             # Order management
-│   │   ├── chat/               # AI chatbot
-│   │   └── payment/            # Payment processing
-│   │
-│   ├── routes/                 # Route aggregation
-│   │   ├── index.ts            # Central router
-│   │   └── csrf.routes.ts      # CSRF token endpoint
-│   │
-│   ├── middlewares/            # Shared middleware
-│   │   ├── auth.middleware.ts  # JWT authentication
-│   │   ├── rbac.middleware.ts  # Permission system
-│   │   ├── rateLimit.middleware.ts  # Rate limiting
-│   │   ├── csrf.middleware.ts  # CSRF protection
-│   │   └── error.middleware.ts # Error handling
-│   │
-│   ├── socket/                 # WebSocket logic
-│   │   └── socket.service.ts   # Socket.io server
-│   │
-│   ├── config/                 # Configuration
-│   │   ├── index.ts            # Environment config
-│   │   └── redis.ts            # Redis client
-│   │
-│   ├── utils/                  # Utilities
-│   │   └── prisma.ts           # Prisma client
-│   │
-│   ├── app.ts                  # Express app
-│   └── server.ts               # Server entry point
-│
-├── .env                        # Environment variables (gitignored)
-├── docker-compose.yml          # Docker services
-├── package.json                # Dependencies
-├── tsconfig.json               # TypeScript config
-├── postman_collection.json     # API testing
-│
-├── README.md                   # This file
-├── TECHNICAL_DOCS.md           # Architecture deep-dive
-├── TEST_CASES.md               # Test scenarios
-├── FOLDER_STRUCTURE.md         # Structure explanation
-└── COOKIE_AUTH_GUIDE.md        # Cookie auth guide
+│   ├── config/
+│   │   ├── index.ts           # Centralized config
+│   │   └── redis.ts           # Redis connection
+│   ├── middlewares/
+│   │   ├── auth.middleware.ts # JWT verification
+│   │   ├── csrf.middleware.ts # CSRF protection
+│   │   ├── rbac.middleware.ts # Role-based access
+│   │   └── rateLimit.middleware.ts
+│   ├── modules/
+│   │   ├── auth/              # Authentication
+│   │   ├── orders/            # Order management
+│   │   ├── payment/           # Payment processing
+│   │   └── chat/              # AI chatbot
+│   ├── socket/
+│   │   └── socket.service.ts  # WebSocket handling
+│   ├── routes/
+│   │   ├── index.ts           # Route aggregator
+│   │   └── csrf.routes.ts     # CSRF routes
+│   ├── utils/
+│   │   ├── logger.ts          # Logging utility
+│   │   ├── time.ts            # Duration parser
+│   │   └── prisma.ts          # Prisma client
+│   ├── app.ts                 # Express app setup
+│   └── server.ts              # Server entry point
+├── .env                       # Environment variables
+├── render.yaml                # Render deployment config
+├── postman_collection.json    # API testing collection
+└── package.json
 ```
 
-### Architecture Pattern
+### **Request Flow**
 
-**Feature-Based Modular Structure:**
-- Each module contains: controller + service + routes + DTOs
-- Better scalability and maintainability
-- Follows Domain-Driven Design (DDD) principles
-- Used by NestJS, Angular, and enterprise applications
+```
+Client Request
+    ↓
+CORS + Helmet (Security)
+    ↓
+Cookie Parser
+    ↓
+Rate Limiter (Redis/Memory)
+    ↓
+Body Parser (JSON)
+    ↓
+Routes
+    ↓
+Auth Middleware (JWT)
+    ↓
+CSRF Middleware
+    ↓
+RBAC Middleware (if needed)
+    ↓
+Controller
+    ↓
+Service (Business Logic)
+    ↓
+Database (Prisma)
+    ↓
+Response
+```
+
+### **Payment Flow**
+
+```
+1. User creates order
+   ↓
+2. Backend creates Payment Intent (Stripe/PayPal)
+   ↓
+3. Returns clientSecret to frontend
+   ↓
+4. Frontend collects payment
+   ↓
+5. Payment processor charges card
+   ↓
+6. Webhook sent to backend
+   ↓
+7. Backend verifies signature
+   ↓
+8. Updates order status
+   ↓
+9. Emits Socket.io event to user
+   ↓
+10. Frontend shows success
+```
 
 ---
 
-## API Documentation
+## 🔒 **Security Features**
 
-### Base URL
-```
-http://localhost:3000/api
-```
-
-### Authentication Endpoints
-
-| Method | Endpoint | Description | CSRF Required |
-|--------|----------|-------------|---------------|
-| POST | `/auth/register` | Register new user | No |
-| POST | `/auth/login` | Login user | No |
-| POST | `/auth/logout` | Logout user | No |
-
-### Protected Endpoints (Require Authentication)
-
-| Method | Endpoint | Description | CSRF Required |
-|--------|----------|-------------|---------------|
-| GET | `/csrf/csrf-token` | Get CSRF token | No |
-| POST | `/orders` | Create order | Yes |
-| PATCH | `/orders/:id/status` | Update order (admin) | Yes |
-| POST | `/chatbot` | Chat with AI | Yes |
-
-### Webhook Endpoints (External Only)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/payments/stripe/webhook` | Stripe payment events |
-| POST | `/payments/paypal/webhook` | PayPal payment events |
+- ✅ **JWT Authentication** - Access + Refresh tokens
+- ✅ **CSRF Protection** - Token-based validation
+- ✅ **Helmet** - Security headers
+- ✅ **CORS** - Configured origins
+- ✅ **Rate Limiting** - Prevents abuse
+- ✅ **Webhook Verification** - Signature validation
+- ✅ **Input Validation** - Zod schemas
+- ✅ **SQL Injection** - Prevented by Prisma
+- ✅ **Trust Proxy** - Correct IP detection
 
 ---
 
-## Security Features
+## 📚 **Additional Documentation**
 
-### 1. HTTP-Only Cookies
-- JWT stored in secure, HTTP-only cookies
-- JavaScript cannot access tokens
-- **Protection:** XSS attacks
-
-### 2. CSRF Protection
-- Double-submit cookie pattern
-- CSRF tokens required for state-changing operations
-- **Protection:** CSRF attacks
-
-### 3. Rate Limiting
-- **Auth endpoints:** 5 requests / 15 minutes
-- **Orders:** 20 requests / minute
-- **Chatbot:** 10 requests / minute
-- **General:** 100 requests / 15 minutes
-
-### 4. RBAC (Role-Based Access Control)
-- Granular permission system
-- Roles: `guest`, `user`, `admin`, `super_admin`
-- Permissions: `orders:create`, `orders:read`, `orders:update`, etc.
-
-### 5. Additional Security
-- Helmet.js (security headers)
-- CORS configuration
-- Input validation (Zod schemas)
-- Webhook signature verification
+- **[LEARN_PAYMENTS.md](./LEARN_PAYMENTS.md)** - Complete payment systems guide
+- **[LEARN_WEBSOCKETS.md](./LEARN_WEBSOCKETS.md)** - WebSocket/Socket.io explanation
+- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick lookup guide
+- **[ADMIN_SETUP_GUIDE.md](./ADMIN_SETUP_GUIDE.md)** - Creating admin users
+- **[RENDER_DEPLOYMENT.md](./RENDER_DEPLOYMENT.md)** - Deployment details
+- **[POSTMAN_GUIDE.md](./POSTMAN_GUIDE.md)** - Postman collection guide
 
 ---
 
-## Quick Start (TL;DR)
+## 🐛 **Troubleshooting**
 
+### **Build Fails**
 ```bash
-# 1. Install & Setup
+# Clear and reinstall
+rm -rf node_modules package-lock.json
 npm install
-docker-compose up -d
-cp .env.example .env
-# Edit .env with your keys
-
-# 2. Database
-npx prisma migrate dev
-
-# 3. Start Server
-npm run dev
-
-# 4. Test in Postman
-# Import postman_collection.json
-# Register → Get CSRF Token → Create Order
-
-# 5. Test Webhooks (Optional)
-# Terminal 1: stripe listen --forward-to localhost:3000/payments/stripe/webhook
-# Terminal 2: npm run dev
-# Terminal 3: stripe trigger payment_intent.succeeded --override 'payment_intent:metadata[orderId]=ORDER_ID'
+npm run build
 ```
 
----
-
-## Troubleshooting
-
-### Database Connection Failed
+### **Database Connection Error**
 ```bash
-# Check if Docker container is running
-docker ps
-
-# Restart containers
-docker-compose restart
-
-# Check logs
-docker logs sm_postgres
+# Verify DATABASE_URL in .env
+psql $DATABASE_URL  # Test connection
+npx prisma migrate deploy  # Run migrations
 ```
 
-### Webhook Signature Error
+### **Redis Connection Error**
+**Not critical** - App automatically falls back to in-memory storage.
+
+To fix:
 ```bash
-# Ensure webhook secret in .env matches Stripe CLI output
-# Restart server after updating .env
-npm run dev
+# Start Redis locally
+redis-server
+
+# Or remove REDIS_URL from .env
 ```
 
-### CSRF Token Invalid
+### **Webhook Not Firing**
+1. Check webhook URL in dashboard
+2. Verify webhook secret in .env
+3. Check logs for signature errors
+4. For local: Use Stripe CLI `stripe listen`
+
+### **CSRF Token Error**
 ```bash
-# Get fresh CSRF token after login
+# Get fresh token
 GET /api/csrf/csrf-token
 
-# Use token in X-CSRF-Token header
+# Use in header
+X-CSRF-Token: your-token-here
 ```
 
-### Redis Connection Issues
-```bash
-# Redis is optional - app falls back to memory
-# Check Redis is running:
-docker exec -it sm_redis redis-cli ping
-# Should return: PONG
-```
-
----
-
-## 👨‍💻 Author
-
-Kutubuddin Juwel
-
----
-
-## 🙏 Acknowledgments
-
-- Stripe for payment processing
-- OpenRouter for AI integration
-- Prisma for database ORM
-- Socket.io for real-time features
-
----
-
-**Built with  using TypeScript, Express, and modern best practices.**
