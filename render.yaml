@@ -43,7 +43,7 @@ services:
 databases:
   - name: sm-postgres
     databaseName: sm_db
-    plan: starter
+    plan: free
     ipAllowList: []
 
 # NOTE: Redis must be created manually in Render Dashboard
